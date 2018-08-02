@@ -1,0 +1,64 @@
+---
+title: "Economist-dataset(corruption and human development)"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+We will be recreating this plot from [The economist](https://www.economist.com/graphic-detail/2011/12/02/corrosive-corruption). 
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(data.table)
+theme_set(theme_economist_white())
+
+df <- fread('Economist_Assignment_Data.csv',drop=1)
+print(head(df))
+
+```
+
+```{r}
+#plot 1 -plotting columns,adding shape and size of points
+pl <- ggplot(df,aes(x=CPI,y=HDI,color=Region))+ geom_point(size=4,shape=1)
+print(pl)
+
+```
+
+```{r}
+#plot 2- plotting regression line and smoothening it 
+pl2 <- pl +geom_smooth(aes(group=1),method = 'lm',formula = y~ log(x),se=F,color='red')
+print(pl2)
+
+
+```
+
+```{r}
+#annotation of selective countries
+pointsToLabel <- c("Russia", "Venezuela", "Iraq", "Myanmar", "Sudan",
+                   "Afghanistan", "Congo", "Greece", "Argentina", "Brazil",
+                   "India", "Italy", "China", "South Africa", "Spane",
+                   "Botswana", "Cape Verde", "Bhutan", "Rwanda", "France",
+                   "United States", "Germany", "Britain", "Barbados", "Norway", "Japan",
+                   "New Zealand", "Singapore")
+
+#plot 3 -  adding labels to points and showing only country which are in pointsTolabel
+pl3 <- pl2 + geom_text(aes(label = Country), color = "gray20", 
+                       data = subset(df, Country %in% pointsToLabel),check_overlap = TRUE)
+
+print(pl3)
+```
+
+```{r}
+#adding x label and scales
+pl4 <- pl3 + scale_x_continuous(name = "Corruption Perceptions Index, 2011 (10=least corrupt)",limits = c(.9, 10.5),breaks=1:10)
+print(pl4)
+```
+```{r}
+#adding y label and scales and plot title
+pl5 <- pl4 + scale_y_continuous(name = "Human Development Index, 2011 (1=Best)",
+                                limits = c(0.2, 1.0)) + ggtitle("Corruption and Human development")+theme(plot.title = element_text(hjust = 0.5))
+print(pl5)
+
+```
+
